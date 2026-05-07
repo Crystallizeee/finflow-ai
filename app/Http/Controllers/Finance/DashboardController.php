@@ -26,8 +26,8 @@ class DashboardController extends Controller
                 ->latest('date')
                 ->take(5)
                 ->get(),
-            'monthlySpending' => $this->analyticsService->getMonthlySpendingChart($user),
-            'categoryBreakdown' => $this->analyticsService->getCategoryBreakdown($user),
+            'monthlySpending' => $this->analyticsService->getMonthlyTrend($user),
+            'categoryBreakdown' => $this->analyticsService->getCategoryDistribution($user),
             'aiInsight' => $this->advisorService->getMonthlyInsight($user),
             'activeGoals' => $user->goals()
                 ->where('is_completed', false)
