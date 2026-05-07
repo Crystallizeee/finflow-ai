@@ -35,6 +35,11 @@ const mainNavItems: NavItem[] = [
         icon: BookOpen,
     },
     {
+        title: 'Transaksi Berulang',
+        href: route('recurring.index'),
+        icon: RefreshCcw,
+    },
+    {
         title: 'Transaksi',
         href: route('transactions.index'),
         icon: Receipt,

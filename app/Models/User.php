@@ -118,6 +118,11 @@ class User extends Authenticatable
         return $this->hasMany(AuditLog::class);
     }
 
+    public function recurringTransactions()
+    {
+        return $this->hasMany(RecurringTransaction::class);
+    }
+
     public function notifications()
     {
         return $this->hasMany(FinflowNotification::class);

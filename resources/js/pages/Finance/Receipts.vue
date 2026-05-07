@@ -25,6 +25,7 @@ const selectedReceipt = ref<any>(null);
 
 interface EditableItem {
     name: string;
+    category_id: string | null;
     price_per_unit: number;
     quantity: number;
     discount: number;
@@ -56,7 +57,7 @@ const recalcTotal = () => {
 };
 
 const addItem = () => {
-    editableItems.value.push({ name: '', price_per_unit: 0, quantity: 1, discount: 0, total_price: 0 });
+    editableItems.value.push({ name: '', category_id: null, price_per_unit: 0, quantity: 1, discount: 0, total_price: 0 });
 };
 
 const removeItem = (idx: number) => {
@@ -99,6 +100,7 @@ const openConfirmModal = (receipt: any) => {
     const srcItems = (receipt.items?.length ? receipt.items : data.items) ?? [];
     editableItems.value = srcItems.map((i: any) => ({
         name: i.name ?? '',
+        category_id: i.category_id ?? null,
         price_per_unit: Number(i.price_per_unit ?? i.price ?? 0),
         quantity: Number(i.quantity ?? 1),
         discount: Number(i.discount ?? 0),
@@ -111,7 +113,10 @@ const openConfirmModal = (receipt: any) => {
 const submitConfirm = () => {
     // Sync the (possibly edited) total from items
     recalcTotal();
-    confirmForm.post(route('receipts.confirm', selectedReceipt.value.id), {
+    confirmForm.transform((data) => ({
+        ...data,
+        items: editableItems.value,
+    })).post(route('receipts.confirm', selectedReceipt.value.id), {
         onSuccess: () => { showModal.value = false; },
     });
 };
@@ -253,10 +258,11 @@ const fmt = (val: number, currency = 'IDR') =>
                             <div class="rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                                 <!-- Table header -->
                                 <div class="grid grid-cols-12 gap-1 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                                    <div class="col-span-4">Nama Item</div>
+                                    <div class="col-span-3">Nama Item</div>
+                                    <div class="col-span-2">Kategori</div>
                                     <div class="col-span-2 text-right">Harga Sat.</div>
                                     <div class="col-span-1 text-center">Qty</div>
-                                    <div class="col-span-2 text-right">Diskon</div>
+                                    <div class="col-span-1 text-right">Diskon</div>
                                     <div class="col-span-2 text-right">Total</div>
                                     <div class="col-span-1"></div>
                                 </div>
@@ -267,9 +273,16 @@ const fmt = (val: number, currency = 'IDR') =>
                                 </div>
                                 <div v-for="(item, idx) in editableItems" :key="idx"
                                     class="grid grid-cols-12 gap-1 px-3 py-2 border-t border-slate-100 dark:border-slate-800 items-center">
-                                    <div class="col-span-4">
+                                    <div class="col-span-3">
                                         <input v-model="item.name" type="text" placeholder="Nama barang"
                                             class="w-full text-xs px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                                    </div>
+                                    <div class="col-span-2">
+                                        <select v-model="item.category_id"
+                                            class="w-full text-[10px] px-1 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                            <option :value="null">Kategori...</option>
+                                            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                                        </select>
                                     </div>
                                     <div class="col-span-2">
                                         <input v-model.number="item.price_per_unit" type="number" min="0" step="100"
@@ -281,7 +294,7 @@ const fmt = (val: number, currency = 'IDR') =>
                                             @input="onItemChange(item)"
                                             class="w-full text-xs px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-center" />
                                     </div>
-                                    <div class="col-span-2">
+                                    <div class="col-span-1">
                                         <input v-model.number="item.discount" type="number" min="0" step="100"
                                             @input="onItemChange(item)"
                                             class="w-full text-xs px-2 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-right" />

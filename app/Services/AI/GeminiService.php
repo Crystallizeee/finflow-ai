@@ -60,7 +60,20 @@ class GeminiService implements AIProviderInterface
         - total_amount: number (raw numeric value, the final paid amount)
         - currency: string (3-letter code, e.g. 'IDR')
         - type: string (must be exactly 'expense' if it's a purchase/shopping, or 'income' if it's a transfer received/deposit)
-        - items: array of objects {name, price_per_unit, quantity, discount, total_price}
+        - items: array of objects {name, category_suggestion, price_per_unit, quantity, discount, total_price}
+        
+        Field 'category_suggestion' MUST be one of these standardized categories if applicable:
+        - 'Makanan & Minuman' (Food, drinks, fresh produce, snacks, frozen food)
+        - 'Kesehatan & Kecantikan' (Medicine, skincare, hair care, toiletries)
+        - 'Kebersihan & Rumah Tangga' (Detergents, cleaning tools, household needs)
+        - 'Bayi & Anak-anak' (Formula, diapers, baby care, toys)
+        - 'Hewan Peliharaan' (Pet food, pet care)
+        - 'Elektronik & Elektrik' (Batteries, light bulbs, small appliances)
+        - 'Olahraga & Outdoor' (Sporting goods, camping gear)
+        - 'Pakaian & Mode' (Clothing, accessories, fashion)
+        - 'Alat Tulis Kantor' (Pens, notebooks, office supplies)
+        - 'Teknologi & Gadget' (Smartphone accessories, small gadgets)
+        - 'Otomotif' (Engine oil, car care)
         
         Return ONLY the JSON object. Do not include markdown blocks.";
 

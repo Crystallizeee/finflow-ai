@@ -29,6 +29,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Goals
     Route::resource('goals', \App\Http\Controllers\Finance\FinancialGoalController::class);
+    Route::get('recurring', [\App\Http\Controllers\Finance\RecurringTransactionController::class, 'index'])->name('recurring.index');
+    Route::post('recurring', [\App\Http\Controllers\Finance\RecurringTransactionController::class, 'store'])->name('recurring.store');
+    Route::patch('recurring/{recurring}/toggle', [\App\Http\Controllers\Finance\RecurringTransactionController::class, 'toggle'])->name('recurring.toggle');
 
     // AI Chat Assistant
     Route::get('ai-chat', [App\Http\Controllers\Finance\AIChatController::class, 'index'])->name('ai-chat.index');

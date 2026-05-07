@@ -59,6 +59,13 @@ class ReceiptController extends Controller
             'amount'      => 'required|numeric|min:0.01',
             'description' => 'required|string',
             'date'        => 'required|date',
+            'items'       => 'nullable|array',
+            'items.*.name' => 'required|string',
+            'items.*.category_id' => 'nullable|string',
+            'items.*.price_per_unit' => 'required|numeric',
+            'items.*.quantity' => 'required|numeric',
+            'items.*.discount' => 'required|numeric',
+            'items.*.total_price' => 'required|numeric',
         ]);
 
         $user = auth()->user();
@@ -81,6 +88,22 @@ class ReceiptController extends Controller
             ]);
 
             $transaction = $this->transactionService->create($user, $transactionData);
+
+            // Sync edited items if provided
+            if ($request->has('items')) {
+                $receipt->items()->delete();
+                foreach ($request->items as $item) {
+                    $receipt->items()->create([
+                        'name' => $item['name'],
+                        'category_id' => $item['category_id'],
+                        'price_per_unit' => $item['price_per_unit'],
+                        'quantity' => $item['quantity'],
+                        'discount' => $item['discount'],
+                        'total_price' => $item['total_price'],
+                        'currency' => $receipt->currency ?? 'IDR',
+                    ]);
+                }
+            }
 
             $receipt->update(['transaction_id' => $transaction->id]);
 

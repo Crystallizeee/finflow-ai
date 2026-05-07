@@ -59,27 +59,32 @@ class ReceiptService
             // 6. Persist individual items to receipt_items table
             if (!empty($data['items']) && is_array($data['items'])) {
                 $receipt->items()->delete(); // clear if re-processing
-                $itemRows = [];
+                
                 foreach ($data['items'] as $item) {
                     $qty = (float) ($item['quantity'] ?? 1);
                     $ppu = (float) ($item['price_per_unit'] ?? $item['price'] ?? 0);
                     $disc = (float) ($item['discount'] ?? 0);
                     $total = (float) ($item['total_price'] ?? ($ppu * $qty) - $disc);
 
-                    $itemRows[] = [
+                    // AI suggested category
+                    $catName = $item['category_suggestion'] ?? 'Lainnya';
+                    $category = \App\Models\Category::firstOrCreate(
+                        ['user_id' => $user->id, 'name' => $catName],
+                        ['color' => '#' . substr(md5($catName), 0, 6), 'type' => 'expense']
+                    );
+
+                    \App\Models\ReceiptItem::create([
                         'receipt_id'     => $receipt->id,
+                        'category_id'    => $category->id,
                         'name'           => $item['name'] ?? 'Unknown Item',
                         'price_per_unit' => $ppu,
                         'quantity'       => $qty,
                         'discount'       => $disc,
                         'total_price'    => $total,
                         'currency'       => $currency,
-                        'created_at'     => now(),
-                        'updated_at'     => now(),
-                    ];
+                    ]);
                 }
-                \App\Models\ReceiptItem::insert($itemRows);
-                \Illuminate\Support\Facades\Log::info("Saved " . count($itemRows) . " receipt items for receipt: " . $receipt->id);
+                \Illuminate\Support\Facades\Log::info("Saved receipt items with categories for receipt: " . $receipt->id);
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Receipt processing failed: " . $e->getMessage());
