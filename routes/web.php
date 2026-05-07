@@ -11,7 +11,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', \App\Http\Controllers\Finance\DashboardController::class)->name('dashboard');
+    Route::get('dashboard', [\App\Http\Controllers\Finance\DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('accounts', AccountController::class);
     Route::resource('transactions', TransactionController::class);
@@ -23,6 +23,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Subscriptions
     Route::resource('subscriptions', \App\Http\Controllers\Finance\SubscriptionController::class);
+
+    // Reports
+    Route::get('reports', [\App\Http\Controllers\Finance\ReportController::class, 'index'])->name('reports.index');
+
+    // Goals
+    Route::resource('goals', \App\Http\Controllers\Finance\FinancialGoalController::class);
 
     // AI Chat Assistant
     Route::get('ai-chat', [App\Http\Controllers\Finance\AIChatController::class, 'index'])->name('ai-chat.index');

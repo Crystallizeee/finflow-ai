@@ -103,6 +103,11 @@ class User extends Authenticatable
         return $this->hasMany(FinancialGoal::class);
     }
 
+    public function goals()
+    {
+        return $this->hasMany(FinancialGoal::class);
+    }
+
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);

@@ -5,7 +5,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import BalanceCard from '@/Components/Dashboard/BalanceCard.vue';
 import { computed } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
-import { Receipt, TrendingUp, Calendar, ArrowUpRight, ArrowDownRight, Wallet } from 'lucide-vue-next';
+import { Receipt, TrendingUp, Calendar, ArrowUpRight, ArrowDownRight, Wallet, Sparkles } from 'lucide-vue-next';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -15,20 +15,19 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const props = defineProps<{
-    accounts: any[];
+    totalBalance: number;
     recentTransactions: any[];
-    chartData: any;
+    monthlySpending: any;
     categoryBreakdown: any[];
+    aiInsight: string;
+    activeGoals: any[];
+    upcomingSubscriptions: any[];
     auth: {
         user: {
             name: string;
         }
     };
 }>();
-
-const totalBalance = computed(() => {
-    return props.accounts.reduce((acc, curr) => acc + parseFloat(curr.balance), 0);
-});
 
 const greeting = computed(() => {
     const hour = new Date().getHours();
@@ -59,7 +58,7 @@ const chartOptions = computed(() => ({
     dataLabels: { enabled: false },
     stroke: { curve: 'smooth', width: 2 },
     xaxis: {
-        categories: props.chartData.labels,
+        categories: props.monthlySpending?.labels || [],
         labels: { show: false },
         axisBorder: { show: false },
         axisTicks: { show: false }
@@ -75,6 +74,10 @@ const chartOptions = computed(() => ({
         }
     }
 }));
+
+const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
+};
 </script>
 
 <template>
@@ -82,6 +85,7 @@ const chartOptions = computed(() => ({
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-8 p-4 md:p-8 max-w-7xl mx-auto w-full">
+            
             <!-- Greeting Section -->
             <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -95,7 +99,7 @@ const chartOptions = computed(() => ({
                 <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Total Kekayaan</p>
                     <p class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
-                        {{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(totalBalance) }}
+                        {{ formatCurrency(totalBalance) }}
                     </p>
                 </div>
             </header>
@@ -116,106 +120,128 @@ const chartOptions = computed(() => ({
                             </div>
                         </div>
                         <div class="h-64 w-full">
-                            <VueApexCharts type="area" height="100%" :options="chartOptions" :series="props.chartData.series" />
-                        </div>
-                    </section>
-
-                    <!-- Accounts Grid -->
-                    <section>
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-xl font-bold flex items-center gap-2">
-                                <Wallet class="w-5 h-5 text-slate-400" />
-                                Akun Saya
-                            </h2>
-                            <Link href="/accounts" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
-                                Lihat Semua →
-                            </Link>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <BalanceCard 
-                                v-for="account in accounts.slice(0, 4)" 
-                                :key="account.id"
-                                :balance="parseFloat(account.balance)"
-                                :currency="account.currency"
-                                :account-name="account.name"
-                                :type="account.type"
-                                :color="account.color"
-                            />
-                            
-                            <Link href="/accounts" class="group relative overflow-hidden rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 p-6 transition-all hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 min-h-[160px] flex flex-col items-center justify-center gap-3">
-                                <div class="p-3 bg-slate-100 dark:bg-slate-900 rounded-2xl group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-400 group-hover:text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                </div>
-                                <span class="text-sm font-bold text-slate-400 group-hover:text-indigo-600">Tambah Akun Baru</span>
-                            </Link>
+                            <VueApexCharts type="area" height="100%" :options="chartOptions" :series="props.monthlySpending?.series || []" />
                         </div>
                     </section>
                 </div>
 
-                <!-- Right Column (Sidebar) -->
-                <div class="space-y-8">
-                    <!-- Top Categories -->
-                    <section class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
-                        <h2 class="text-lg font-bold mb-6">Top Pengeluaran Kategori</h2>
-                        <div class="space-y-4">
-                            <div v-for="cat in categoryBreakdown" :key="cat.name" class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" :style="{ backgroundColor: cat.color + '20', color: cat.color }">
-                                    <Receipt class="w-5 h-5" />
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <h3 class="text-sm font-semibold truncate">{{ cat.name }}</h3>
-                                        <span class="text-sm font-bold">{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(cat.total) }}</span>
-                                    </div>
-                                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
-                                        <!-- Fake percentage for visual -->
-                                        <div class="h-1.5 rounded-full" :style="{ width: Math.max(10, Math.random() * 100) + '%', backgroundColor: cat.color }"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div v-if="!categoryBreakdown.length" class="text-center py-6 text-slate-400 text-sm">
-                                Belum ada data kategori
+                <!-- AI Advice Widget -->
+                <div class="xl:col-span-1">
+                    <div class="bg-indigo-600 rounded-[2.5rem] p-8 text-white h-full relative overflow-hidden shadow-xl flex flex-col justify-between">
+                        <Sparkles class="absolute -top-4 -right-4 w-24 h-24 text-white/10" />
+                        <div class="relative z-10">
+                            <h3 class="text-2xl font-black mb-6 flex items-center gap-2">
+                                Advisor AI
+                            </h3>
+                            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
+                                <p class="text-base leading-relaxed text-indigo-50">
+                                    "{{ aiInsight || 'Sedang menganalisis kebiasaan belanja Anda...' }}"
+                                </p>
                             </div>
                         </div>
-                    </section>
+                        <div class="mt-8 relative z-10">
+                            <Link :href="route('ai-chat.index')" class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-white text-indigo-600 px-6 py-3 rounded-2xl hover:bg-indigo-50 transition-all shadow-lg shadow-indigo-900/20">
+                                Tanya Lebih Lanjut
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    <!-- Recent Transactions -->
-                    <section class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
+            <!-- Bottom Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+                <!-- Recent Activity -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
                         <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-lg font-bold">Aktivitas Terakhir</h2>
-                            <Link href="/transactions" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Lihat Semua</Link>
+                            <h3 class="text-lg font-black text-slate-900 dark:text-white">Aktivitas Terbaru</h3>
+                            <Link :href="route('transactions.index')" class="text-xs font-bold text-indigo-600 hover:text-indigo-700">Semua</Link>
                         </div>
-                        
+
                         <div class="space-y-5">
-                            <div v-for="tx in recentTransactions" :key="tx.id" class="flex gap-4 items-center">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                                     :class="tx.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'">
-                                    <ArrowUpRight v-if="tx.type === 'expense'" class="w-5 h-5" />
-                                    <ArrowDownRight v-else class="w-5 h-5" />
+                            <div v-for="tx in recentTransactions" :key="tx.id" class="flex items-center gap-4 group">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors"
+                                    :style="{ backgroundColor: tx.category?.color + '20' }">
+                                    <Receipt class="w-5 h-5" :style="{ color: tx.category?.color }" />
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white truncate">{{ tx.description }}</h3>
-                                    <p class="text-xs text-slate-500 mt-0.5">{{ tx.category?.name || 'Tanpa Kategori' }} • {{ new Date(tx.date).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }) }}</p>
+                                    <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">{{ tx.description }}</h4>
+                                    <p class="text-[10px] text-slate-500">{{ new Date(tx.date).toLocaleDateString() }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-sm font-bold" :class="tx.type === 'income' ? 'text-emerald-600' : 'text-slate-900 dark:text-white'">
-                                        {{ tx.type === 'income' ? '+' : '-' }}{{ new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(tx.amount) }}
+                                    <p class="text-sm font-black" :class="tx.type === 'expense' ? 'text-rose-600' : 'text-emerald-600'">
+                                        {{ tx.type === 'expense' ? '-' : '+' }}{{ formatCurrency(tx.amount) }}
                                     </p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <div v-if="!recentTransactions.length" class="text-center py-8">
-                                <Calendar class="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                                <p class="text-sm text-slate-500">Belum ada transaksi</p>
+                <!-- Goals Widget -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Target</h3>
+                            <Link :href="route('goals.index')" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-700">LIHAT</Link>
+                        </div>
+                        <div class="space-y-4">
+                            <div v-for="goal in activeGoals" :key="goal.name">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300 truncate max-w-[100px]">{{ goal.icon }} {{ goal.name }}</span>
+                                    <span class="text-[10px] font-black text-indigo-600">{{ goal.progress }}%</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-indigo-600" :style="{ width: goal.progress + '%' }"></div>
+                                </div>
+                            </div>
+                            <div v-if="!activeGoals?.length" class="text-center py-4">
+                                <p class="text-[10px] text-slate-400 italic">Kosong</p>
                             </div>
                         </div>
-                    </section>
+                    </div>
+                </div>
+
+                <!-- Subscriptions Widget (NEW) -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Langganan</h3>
+                            <Link :href="route('subscriptions.index')" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-700">LIHAT</Link>
+                        </div>
+                        <div class="space-y-4">
+                            <div v-for="sub in upcomingSubscriptions" :key="sub.name" class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-xs font-bold text-slate-900 dark:text-white">{{ sub.name }}</p>
+                                    <p class="text-[10px] text-slate-400">{{ sub.next_date }}</p>
+                                </div>
+                                <p class="text-xs font-black text-rose-600">{{ formatCurrency(sub.amount) }}</p>
+                            </div>
+                            <div v-if="!upcomingSubscriptions?.length" class="text-center py-4">
+                                <p class="text-[10px] text-slate-400 italic">Kosong</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Breakdown -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                        <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mb-6">Kategori</h3>
+                        <div class="space-y-4">
+                            <div v-for="cat in categoryBreakdown.slice(0, 3)" :key="cat.name">
+                                <div class="flex justify-between text-[10px] font-bold mb-1">
+                                    <span class="text-slate-600 dark:text-slate-400 truncate max-w-[80px]">{{ cat.name }}</span>
+                                    <span class="text-slate-900 dark:text-white">{{ formatCurrency(cat.total) }}</span>
+                                </div>
+                                <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <div class="h-full" :style="{ width: '70%', backgroundColor: cat.color }"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </AppLayout>
 </template>
-

@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Wallet, Receipt, Camera, BookOpen, Folder, Bot, PieChart, RefreshCcw } from 'lucide-vue-next';
+import { LayoutGrid, Wallet, Receipt, Camera, BookOpen, Folder, Bot, PieChart, RefreshCcw, Award } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -30,6 +30,11 @@ const mainNavItems: NavItem[] = [
         icon: RefreshCcw,
     },
     {
+        title: 'Laporan AI',
+        href: route('reports.index'),
+        icon: BookOpen,
+    },
+    {
         title: 'Transaksi',
         href: route('transactions.index'),
         icon: Receipt,
@@ -38,6 +43,11 @@ const mainNavItems: NavItem[] = [
         title: 'Scan Struk',
         href: route('receipts.index'),
         icon: Camera,
+    },
+    {
+        title: 'Target Keuangan',
+        href: route('goals.index'),
+        icon: Award,
     },
     {
         title: 'Akun',

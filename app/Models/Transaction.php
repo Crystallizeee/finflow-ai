@@ -96,7 +96,13 @@ class Transaction extends Model
                 })
                 ->sum('base_amount');
 
+            $oldSpent = $budget->spent;
             $budget->update(['spent' => $totalSpent]);
+
+            // Fire event if it just crossed the threshold
+            if ($totalSpent > $budget->amount && $oldSpent <= $budget->amount) {
+                event(new \App\Events\BudgetExceeded($budget));
+            }
         }
     }
 
