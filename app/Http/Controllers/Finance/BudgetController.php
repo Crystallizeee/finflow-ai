@@ -7,20 +7,39 @@ use App\Models\Budget;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class BudgetController extends Controller
 {
     public function index(Request $request)
     {
-        $budgets = $request->user()->budgets()
+        $user = $request->user();
+        $budgets = $user->budgets()
             ->with('category')
             ->orderBy('is_active', 'desc')
             ->orderBy('end_date', 'asc')
             ->get();
 
+        $categories = $user->categories()
+            ->where('type', 'expense')
+            ->get(['id', 'name']);
+
         return Inertia::render('Finance/Budgets', [
-            'budgets' => $budgets,
-            'categories' => Category::where('user_id', $request->user()->id)->get(),
+            'budgets' => $budgets->map(fn($b) => [
+                'id' => $b->id,
+                'name' => $b->name,
+                'amount' => (float) $b->amount,
+                'spent' => (float) $b->spent,
+                'remaining' => (float) $b->remaining,
+                'progress' => (float) $b->progress,
+                'category' => $b->category?->name ?? 'Semua Pengeluaran',
+                'period' => $b->period,
+                'is_active' => $b->is_active,
+                'end_date' => $b->end_date->format('d M Y'),
+                'is_over' => $b->spent > $b->amount,
+            ]),
+            'categories' => $categories,
+            'aiRecommendation' => $this->getAIRecommendation($user),
         ]);
     }
 
@@ -29,46 +48,31 @@ class BudgetController extends Controller
         $validated = $request->validate([
             'category_id' => 'nullable|exists:categories,id',
             'name' => 'required|string|max:100',
-            'amount' => 'required|numeric|min:0',
-            'period' => 'required|string|in:weekly,monthly,quarterly,yearly',
+            'amount' => 'required|numeric|min:1',
+            'period' => 'required|in:weekly,monthly,quarterly,yearly',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_date' => 'required|date|after:start_date',
         ]);
 
         $request->user()->budgets()->create($validated);
 
-        return redirect()->back()->with('success', 'Anggaran berhasil dibuat.');
+        return redirect()->back();
     }
 
-    public function update(Request $request, Budget $budget)
+    private function getAIRecommendation($user)
     {
-        if ($budget->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        // Simple logic for now: suggest 90% of last month's spending for food
+        $lastMonth = now()->subMonth();
+        $spent = $user->transactions()
+            ->where('type', 'expense')
+            ->whereMonth('date', $lastMonth->month)
+            ->sum('amount');
 
-        $validated = $request->validate([
-            'category_id' => 'nullable|exists:categories,id',
-            'name' => 'required|string|max:100',
-            'amount' => 'required|numeric|min:0',
-            'period' => 'required|string|in:weekly,monthly,quarterly,yearly',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'is_active' => 'required|boolean',
-        ]);
+        if ($spent <= 0) return null;
 
-        $budget->update($validated);
-
-        return redirect()->back()->with('success', 'Anggaran diperbarui.');
-    }
-
-    public function destroy(Request $request, Budget $budget)
-    {
-        if ($budget->user_id !== $request->user()->id) {
-            abort(403);
-        }
-
-        $budget->delete();
-
-        return redirect()->back()->with('success', 'Anggaran dihapus.');
+        return [
+            'text' => "Berdasarkan pengeluaran bulan lalu, kami sarankan total budget bulanan Anda di sekitar " . number_format($spent * 0.9, 0, ',', '.') . " untuk menghemat 10%.",
+            'suggestedAmount' => round($spent * 0.9)
+        ];
     }
 }

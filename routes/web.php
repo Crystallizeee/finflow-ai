@@ -29,6 +29,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Goals
     Route::resource('goals', \App\Http\Controllers\Finance\FinancialGoalController::class);
+    Route::get('analytics', [\App\Http\Controllers\Finance\AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::resource('budgets', \App\Http\Controllers\Finance\BudgetController::class);
+    Route::resource('subscriptions', \App\Http\Controllers\Finance\SubscriptionController::class);
+    Route::patch('subscriptions/{subscription}/toggle', [\App\Http\Controllers\Finance\SubscriptionController::class, 'toggle'])->name('subscriptions.toggle');
     Route::get('recurring', [\App\Http\Controllers\Finance\RecurringTransactionController::class, 'index'])->name('recurring.index');
     Route::post('recurring', [\App\Http\Controllers\Finance\RecurringTransactionController::class, 'store'])->name('recurring.store');
     Route::patch('recurring/{recurring}/toggle', [\App\Http\Controllers\Finance\RecurringTransactionController::class, 'toggle'])->name('recurring.toggle');

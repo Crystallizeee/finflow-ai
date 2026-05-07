@@ -49,6 +49,18 @@ class Budget extends Model
         return round(($this->spent / $this->amount) * 100, 2);
     }
 
+    public function getRemainingAttribute()
+    {
+        return max(0, $this->amount - $this->spent);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now());
+    }
+
     public function getIsOverBudgetAttribute(): bool
     {
         return $this->spent > $this->amount;

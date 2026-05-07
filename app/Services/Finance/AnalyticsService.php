@@ -8,58 +8,67 @@ use Illuminate\Support\Facades\DB;
 
 class AnalyticsService
 {
-    public function getMonthlySpendingChart(User $user, int $days = 30): array
+    public function getMonthlyTrend(User $user, int $months = 6)
     {
-        $startDate = now()->subDays($days - 1)->startOfDay();
-        $endDate = now()->endOfDay();
-
-        $transactions = $user->transactions()
-            ->where('transactions.type', 'expense')
-            ->whereBetween('transactions.date', [$startDate, $endDate])
+        $data = $user->transactions()
             ->select(
-                DB::raw('DATE(transactions.date) as tx_date'),
-                DB::raw('SUM(transactions.base_amount) as total')
+                DB::raw("to_char(date, 'Mon') as month"),
+                DB::raw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income"),
+                DB::raw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense"),
+                DB::raw("MIN(date) as sort_date")
             )
-            ->groupBy(DB::raw('DATE(transactions.date)'))
-            ->orderBy('tx_date')
+            ->where('date', '>=', now()->subMonths($months))
+            ->groupBy('month')
+            ->orderBy('sort_date')
             ->get();
 
-        // Fill missing days with 0
-        $data = [];
-        for ($i = 0; $i < $days; $i++) {
-            $date = $startDate->copy()->addDays($i)->format('Y-m-d');
-            $data[$date] = 0;
-        }
-
-        foreach ($transactions as $tx) {
-            $data[$tx->tx_date] = (float) $tx->total;
-        }
-
         return [
-            'labels' => array_keys($data),
-            'series' => [
-                [
-                    'name' => 'Pengeluaran',
-                    'data' => array_values($data),
-                ]
-            ]
+            'labels' => $data->pluck('month'),
+            'income' => $data->pluck('income')->map(fn($v) => (float) $v),
+            'expense' => $data->pluck('expense')->map(fn($v) => (float) $v),
         ];
     }
 
-    public function getCategoryBreakdown(User $user, int $days = 30): array
+    public function getCategoryDistribution(User $user)
     {
-        $startDate = now()->subDays($days)->startOfDay();
-
         $data = $user->transactions()
-            ->where('transactions.type', 'expense')
-            ->where('transactions.date', '>=', $startDate)
-            ->join('categories', 'transactions.category_id', '=', 'categories.id')
-            ->select('categories.name', 'categories.color', DB::raw('SUM(transactions.base_amount) as total'))
-            ->groupBy('categories.id', 'categories.name', 'categories.color')
-            ->orderByDesc('total')
-            ->take(5)
+            ->with('category')
+            ->select(
+                'category_id',
+                DB::raw("SUM(amount) as total")
+            )
+            ->where('type', 'expense')
+            ->whereMonth('date', now()->month)
+            ->groupBy('category_id')
             ->get();
 
-        return $data->toArray();
+        return $data->map(fn($item) => [
+            'name' => $item->category?->name ?? 'Lainnya',
+            'value' => (float) $item->total,
+            'color' => $item->category?->color ?? '#cbd5e1',
+        ]);
+    }
+
+    public function getForecast(User $user)
+    {
+        // Simple linear forecast based on average spending
+        $avgExpense = $user->transactions()
+            ->where('type', 'expense')
+            ->where('date', '>=', now()->subMonths(3))
+            ->sum('amount') / 3;
+
+        $currentBalance = $user->accounts()->sum('balance');
+        $daysInMonth = now()->daysInMonth;
+        $currentDay = now()->day;
+        $daysRemaining = $daysInMonth - $currentDay;
+
+        $dailyAvg = $avgExpense / 30;
+        $projectedSpending = $dailyAvg * $daysRemaining;
+
+        return [
+            'projected_end_balance' => max(0, $currentBalance - $projectedSpending),
+            'projected_spending' => (float) $projectedSpending,
+            'is_risky' => ($currentBalance - $projectedSpending) < ($currentBalance * 0.1),
+        ];
     }
 }

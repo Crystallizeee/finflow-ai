@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Wallet, Receipt, Camera, BookOpen, Folder, Bot, PieChart, RefreshCcw, Award } from 'lucide-vue-next';
+import { LayoutGrid, Wallet, Receipt, Camera, BookOpen, Folder, Bot, PieChart, RefreshCcw, Award, BarChart3 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -31,8 +31,8 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Laporan AI',
-        href: route('reports.index'),
-        icon: BookOpen,
+        href: '/analytics',
+        icon: BarChart3,
     },
     {
         title: 'Transaksi Berulang',
