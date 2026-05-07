@@ -59,7 +59,14 @@ const chartOptions = computed(() => ({
     stroke: { curve: 'smooth', width: 2 },
     xaxis: {
         categories: props.monthlySpending?.labels || [],
-        labels: { show: false },
+        labels: { 
+            show: true,
+            style: {
+                colors: '#94a3b8',
+                fontSize: '10px',
+                fontWeight: 900
+            }
+        },
         axisBorder: { show: false },
         axisTicks: { show: false }
     },
@@ -74,6 +81,13 @@ const chartOptions = computed(() => ({
         }
     }
 }));
+
+const spendingSeries = computed(() => {
+    return [{
+        name: 'Pengeluaran',
+        data: props.monthlySpending?.expense || []
+    }];
+});
 
 const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
@@ -120,7 +134,7 @@ const formatCurrency = (value: number) => {
                             </div>
                         </div>
                         <div class="h-64 w-full">
-                            <VueApexCharts type="area" height="100%" :options="chartOptions" :series="props.monthlySpending?.series || []" />
+                            <VueApexCharts type="area" height="100%" :options="chartOptions" :series="spendingSeries" />
                         </div>
                     </section>
                 </div>
