@@ -30,6 +30,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Goals
     Route::resource('goals', \App\Http\Controllers\Finance\FinancialGoalController::class);
     Route::get('analytics', [\App\Http\Controllers\Finance\AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('export', [\App\Http\Controllers\Finance\ExportController::class, 'export'])->name('export.transactions');
     Route::resource('budgets', \App\Http\Controllers\Finance\BudgetController::class);
     Route::resource('subscriptions', \App\Http\Controllers\Finance\SubscriptionController::class);
     Route::patch('subscriptions/{subscription}/toggle', [\App\Http\Controllers\Finance\SubscriptionController::class, 'toggle'])->name('subscriptions.toggle');

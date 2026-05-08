@@ -11,9 +11,28 @@ import {
     ArrowUpRight, 
     ArrowDownRight,
     ShoppingBag,
-    History
+    History,
+    Download,
+    FileSpreadsheet,
+    FileText,
+    FileJson,
+    X,
+    Calendar as CalendarIcon
 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+
+const showExportModal = ref(false);
+const exportForm = ref({
+    format: 'pdf',
+    start_date: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+    end_date: new Date().toISOString().split('T')[0],
+});
+
+const handleExport = () => {
+    const params = new URLSearchParams(exportForm.value as any).toString();
+    window.open(`${route('export.transactions')}?${params}`, '_blank');
+    showExportModal.value = false;
+};
 
 const props = defineProps<{
     monthlyTrend: {
@@ -62,13 +81,22 @@ const totalExpense = computed(() => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-6 md:p-10 max-w-7xl mx-auto w-full">
             <!-- Header -->
-            <div class="mb-12">
-                <h1 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-                    <BarChart3 class="w-10 h-10 text-indigo-600" />
-                    Financial Intelligence
-                </h1>
-                <p class="text-slate-500 mt-2 italic font-medium">"Data adalah kompas, AI adalah nahkodanya."</p>
-            </div>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div>
+                        <h1 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+                            <BarChart3 class="w-10 h-10 text-indigo-600" />
+                            Financial Intelligence
+                        </h1>
+                        <p class="text-slate-500 mt-2 italic font-medium">"Data adalah kompas, AI adalah nahkodanya."</p>
+                    </div>
+                    <button 
+                        @click="showExportModal = true"
+                        class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm"
+                    >
+                        <Download class="w-5 h-5 text-indigo-600" />
+                        Export Report
+                    </button>
+                </div>
 
             <!-- AI Forecast & Insight Section -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
@@ -200,5 +228,78 @@ const totalExpense = computed(() => {
                 </div>
             </div>
         </div>
+
+        <!-- Export Modal -->
+        <Teleport to="body">
+            <div v-if="showExportModal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] w-full max-w-lg p-10 shadow-2xl relative border border-slate-100 dark:border-slate-800">
+                    <button @click="showExportModal = false" class="absolute top-8 right-8 text-slate-400 hover:text-slate-600">
+                        <X class="w-6 h-6" />
+                    </button>
+                    
+                    <h2 class="text-3xl font-black mb-2">Export Report</h2>
+                    <p class="text-slate-500 mb-8 font-medium">Pilih format dan rentang waktu laporan Anda.</p>
+
+                    <div class="space-y-8">
+                        <!-- Format Selection -->
+                        <div>
+                            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Format File</label>
+                            <div class="grid grid-cols-3 gap-4">
+                                <button 
+                                    @click="exportForm.format = 'pdf'"
+                                    class="flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all"
+                                    :class="exportForm.format === 'pdf' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'"
+                                >
+                                    <FileText class="w-8 h-8 text-rose-500" />
+                                    <span class="text-xs font-black">PDF</span>
+                                </button>
+                                <button 
+                                    @click="exportForm.format = 'xlsx'"
+                                    class="flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all"
+                                    :class="exportForm.format === 'xlsx' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'"
+                                >
+                                    <FileSpreadsheet class="w-8 h-8 text-emerald-500" />
+                                    <span class="text-xs font-black">Excel</span>
+                                </button>
+                                <button 
+                                    @click="exportForm.format = 'csv'"
+                                    class="flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all"
+                                    :class="exportForm.format === 'csv' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'"
+                                >
+                                    <FileJson class="w-8 h-8 text-slate-500" />
+                                    <span class="text-xs font-black">CSV</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Dari Tanggal</label>
+                                <div class="relative">
+                                    <CalendarIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <input v-model="exportForm.start_date" type="date" class="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Sampai Tanggal</label>
+                                <div class="relative">
+                                    <CalendarIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <input v-model="exportForm.end_date" type="date" class="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button 
+                            @click="handleExport"
+                            class="w-full bg-indigo-600 text-white py-5 rounded-[1.5rem] font-black text-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 shadow-xl shadow-indigo-200 dark:shadow-none mt-4"
+                        >
+                            <Download class="w-6 h-6" />
+                            Download Laporan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
     </AppLayout>
 </template>

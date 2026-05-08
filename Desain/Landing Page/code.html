@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinGen AI - Your Money on Autopilot</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&amp;family=Inter:wght@100..900&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#edeeef",
+                        "background": "#f8f9fa",
+                        "tertiary-container": "#2a1700",
+                        "error": "#ba1a1a",
+                        "primary": "#000000",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c4c7c7",
+                        "on-tertiary-fixed": "#2a1700",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-variant": "#e1e3e4",
+                        "on-background": "#191c1d",
+                        "on-primary-container": "#858383",
+                        "on-primary-fixed-variant": "#474746",
+                        "on-tertiary-container": "#b87500",
+                        "on-secondary-fixed-variant": "#004395",
+                        "on-secondary-fixed": "#001a42",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary-container": "#2170e4",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#fefcff",
+                        "on-surface": "#191c1d",
+                        "primary-container": "#1c1b1b",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#1c1b1b",
+                        "secondary": "#0058be",
+                        "outline": "#747878",
+                        "surface": "#f8f9fa",
+                        "primary-fixed": "#e5e2e1",
+                        "primary-fixed-dim": "#c8c6c5",
+                        "inverse-primary": "#c8c6c5",
+                        "inverse-surface": "#2e3132",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#000000",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#5f5e5e",
+                        "on-surface-variant": "#444748",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-dim": "#d9dadb",
+                        "surface-container-high": "#e7e8e9",
+                        "surface-bright": "#f8f9fa",
+                        "secondary-fixed-dim": "#adc6ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "margin-desktop": "40px",
+                        "margin-tablet": "24px",
+                        "base": "8px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["JetBrains Mono"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["13px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0f111a; /* Deep space-blue/black fallback */
+            background-image: radial-gradient(circle at top right, rgba(139, 92, 246, 0.15), transparent 40%), 
+                              radial-gradient(circle at bottom left, rgba(6, 182, 212, 0.1), transparent 40%);
+            color: #ffffff;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #a855f7, #22d3ee); /* Neon purple to cyan */
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-body-md">
+<!-- TopNavBar -->
+<nav class="bg-surface/80 dark:bg-surface-container-lowest/80 backdrop-blur-lg border-b border-outline-variant/30 backdrop-saturate-150 shadow-sm fixed top-0 w-full z-50">
+<div class="flex justify-between items-center h-16 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="text-headline-md font-headline-md font-extrabold tracking-tighter text-primary dark:text-on-surface">
+                FinGen AI
+            </div>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-on-surface-variant dark:text-outline text-label-md font-label-md hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">Features</a>
+<a class="text-on-surface-variant dark:text-outline text-label-md font-label-md hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">Advisors</a>
+<a class="text-on-surface-variant dark:text-outline text-label-md font-label-md hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">Security</a>
+<a class="text-on-surface-variant dark:text-outline text-label-md font-label-md hover:text-secondary dark:hover:text-secondary-fixed transition-colors duration-200" href="#">Pricing</a>
+</div>
+<div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded font-label-md text-label-md hover:opacity-90 transition-opacity">
+                    Get Started
+                </button>
+</div>
+</div>
+</nav>
+<main class="flex-grow pt-24 pb-16">
+<!-- Hero Section -->
+<section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
+<div class="flex flex-col gap-6">
+<h1 class="text-display-lg font-display-lg text-white">
+                    Your Money on <span class="text-gradient">Autopilot.</span>
+</h1>
+<p class="text-body-lg font-body-lg text-gray-300 max-w-md">
+                    Meet your AI Financial Co-pilot. Budget, save, and invest with a vibe.
+                </p>
+<div>
+<button class="bg-gradient-to-r from-purple-600 to-cyan-500 text-white px-8 py-3 rounded-lg font-label-md text-label-md shadow-[0_0_15px_rgba(168,85,247,0.5)] hover:shadow-[0_0_25px_rgba(34,211,238,0.6)] transition-shadow duration-300">
+                        Level Up Your Wallet
+                    </button>
+</div>
+<div class="mt-8 flex items-center gap-3">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-gray-600 border border-gray-800"></div>
+<div class="w-8 h-8 rounded-full bg-gray-500 border border-gray-800"></div>
+<div class="w-8 h-8 rounded-full bg-gray-400 border border-gray-800"></div>
+</div>
+<span class="text-label-sm font-label-sm text-gray-400 uppercase tracking-widest">Join 100k+ Gen Zers leveling up.</span>
+</div>
+</div>
+<div class="relative w-full aspect-square md:aspect-auto md:h-[500px] flex items-center justify-center">
+<div class="absolute inset-0 bg-gradient-to-tr from-purple-900/20 to-cyan-900/20 rounded-full blur-3xl"></div>
+<img alt="Financial Co-pilot Orb" class="relative z-10 w-full h-full object-contain drop-shadow-[0_0_40px_rgba(168,85,247,0.3)]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBM_BiDJE_fW8s30e66NkNRKUBalezzLbx2aGpFPK9fRVvhdSpCbOJwY_5KQ_CEt944i8EJXc4OiieO2G7UHsIv59-zAk8hBAHScsnWGQknAbFM0JR6AW35T-gld3331SGn1Ako1VXtLT1mc41JHZz0KC_pBvg8gx34_lfm828nG9FqdmaIXuLQllrWGlFn9bbbgFIoszsbdM_Nx5_H6_-vD88fP5bxzAXJ02vACE6Vm7fQ86agI_SJhobzzvn_w_KFqlSQfPFGzbrh"/>
+</div>
+</section>
+<!-- Bento Grid Features Section -->
+<section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-16">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:grid-rows-2 auto-rows-[250px]">
+<!-- Feature 1: Smart Budgets (Spans 2 columns on desktop) -->
+<div class="glass-card rounded-xl p-8 flex flex-col justify-between md:col-span-2 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -mr-20 -mt-20 transition-transform duration-500 group-hover:scale-110"></div>
+<div>
+<div class="w-12 h-12 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-purple-400" data-icon="account_balance_wallet" data-weight="fill" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-white mb-2">Smart Budgets</h3>
+<p class="text-body-md font-body-md text-gray-400 max-w-sm">Let AI find the flex. Auto-budgeting that actually works.</p>
+</div>
+<!-- Minimalist decorative graphic for budgeting -->
+<div class="h-16 w-full flex items-end gap-2 opacity-50">
+<div class="w-1/6 bg-purple-500/40 rounded-t h-1/3"></div>
+<div class="w-1/6 bg-cyan-500/40 rounded-t h-2/3"></div>
+<div class="w-1/6 bg-purple-500/40 rounded-t h-1/2"></div>
+<div class="w-1/6 bg-cyan-500/40 rounded-t h-full"></div>
+<div class="w-1/6 bg-purple-500/40 rounded-t h-3/4"></div>
+<div class="w-1/6 bg-cyan-500/40 rounded-t h-1/4"></div>
+</div>
+</div>
+<!-- Feature 2: AI Advisor -->
+<div class="glass-card rounded-xl p-8 flex flex-col justify-between relative overflow-hidden group md:row-span-2">
+<div class="absolute bottom-0 left-0 w-full h-1/2 bg-cyan-500/5 blur-2xl transition-opacity duration-500 group-hover:opacity-100 opacity-50"></div>
+<div>
+<div class="w-12 h-12 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-cyan-400" data-icon="smart_toy" data-weight="fill" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-white mb-2">AI Advisor</h3>
+<p class="text-body-md font-body-md text-gray-400">Chat with your wealth coach 24/7. No cap, just gains.</p>
+</div>
+<!-- Mock Chat Bubble -->
+<div class="mt-8 bg-white/5 border border-white/10 rounded-lg p-4 text-sm text-gray-300 relative">
+                        "Based on your recent vibe check, you can save $50 this week by skipping delivery."
+                        <div class="absolute -bottom-2 right-4 w-4 h-4 bg-white/5 border-b border-r border-white/10 rotate-45"></div>
+</div>
+</div>
+<!-- Feature 3: Transaction Tracking -->
+<div class="glass-card rounded-xl p-8 flex flex-col justify-between md:col-span-2 relative overflow-hidden group">
+<div class="absolute -bottom-10 right-10 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl transition-transform duration-500 group-hover:scale-125"></div>
+<div class="flex items-start justify-between">
+<div>
+<div class="w-12 h-12 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-blue-400" data-icon="receipt_long" data-weight="fill" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-white mb-2">Transaction Tracking</h3>
+<p class="text-body-md font-body-md text-gray-400 max-w-sm">Real-time tracking for every vibe. Spend smarter, live better.</p>
+</div>
+<!-- Minimalist Transaction List Graphic -->
+<div class="hidden sm:flex flex-col gap-3 w-48 opacity-60">
+<div class="h-8 bg-white/5 rounded w-full flex items-center px-3 justify-between">
+<div class="w-16 h-2 bg-white/20 rounded"></div>
+<div class="w-8 h-2 bg-purple-400/50 rounded"></div>
+</div>
+<div class="h-8 bg-white/5 rounded w-full flex items-center px-3 justify-between">
+<div class="w-12 h-2 bg-white/20 rounded"></div>
+<div class="w-10 h-2 bg-cyan-400/50 rounded"></div>
+</div>
+<div class="h-8 bg-white/5 rounded w-full flex items-center px-3 justify-between">
+<div class="w-20 h-2 bg-white/20 rounded"></div>
+<div class="w-6 h-2 bg-purple-400/50 rounded"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-primary-container border-t border-outline-variant/20 w-full py-12">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop gap-gutter">
+<div class="text-headline-sm font-headline-sm font-bold text-primary dark:text-on-primary-fixed mb-4 md:mb-0">
+                FinGen AI
+            </div>
+<div class="flex flex-wrap justify-center gap-6 mb-4 md:mb-0">
+<a class="text-on-surface-variant dark:text-on-primary-container/70 text-label-sm font-label-sm hover:text-primary dark:hover:text-tertiary-fixed-dim transition-all ease-in-out" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant dark:text-on-primary-container/70 text-label-sm font-label-sm hover:text-primary dark:hover:text-tertiary-fixed-dim transition-all ease-in-out" href="#">Terms of Service</a>
+<a class="text-on-surface-variant dark:text-on-primary-container/70 text-label-sm font-label-sm hover:text-primary dark:hover:text-tertiary-fixed-dim transition-all ease-in-out" href="#">Discord Community</a>
+<a class="text-on-surface-variant dark:text-on-primary-container/70 text-label-sm font-label-sm hover:text-primary dark:hover:text-tertiary-fixed-dim transition-all ease-in-out" href="#">Twitter</a>
+<a class="text-on-surface-variant dark:text-on-primary-container/70 text-label-sm font-label-sm hover:text-primary dark:hover:text-tertiary-fixed-dim transition-all ease-in-out" href="#">Contact</a>
+</div>
+<div class="text-on-surface-variant dark:text-on-primary-container/70 text-body-sm font-body-sm text-center md:text-right">
+                © 2024 FinGen AI. Built for the next generation of wealth.
+            </div>
+</div>
+</footer>
+</body></html>

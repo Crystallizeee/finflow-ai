@@ -1555,33 +1555,35 @@ return Inertia::render('Dashboard', [
 
 ## 16. Development Roadmap
 
-### Phase 1 — MVP (Weeks 1-6)
-- [ ] Authentication (email, Google OAuth, 2FA)
-- [ ] Account & transaction CRUD
-- [ ] Basic dashboard (balance, income/expense)
-- [ ] Category management
-- [ ] Basic budgeting
-- [ ] Mobile-responsive UI
+### Phase 1 — MVP (DONE ✅)
+- [x] Authentication (email, Google OAuth, 2FA)
+- [x] Account & transaction CRUD
+- [x] Basic dashboard (balance, income/expense)
+- [x] Category management
+- [x] Basic budgeting
+- [x] Mobile-responsive UI
 
-### Phase 2 — AI Core (Weeks 7-10)
-- [ ] Receipt scanner (OCR via OpenRouter vision)
-- [ ] AI finance assistant (chat)
-- [ ] Subscription detection
-- [ ] Realtime notifications (Reverb)
-- [ ] Weekly AI report email
+### Phase 2 — AI Core (DONE ✅)
+- [x] Receipt scanner (OCR via OpenRouter vision)
+- [x] Per-item receipt categorization (Supermarket standards)
+- [x] AI finance assistant (chat)
+- [x] Subscription detection logic
+- [x] Realtime notifications (Reverb foundation)
+- [ ] Weekly AI report email (In Progress)
 
-### Phase 3 — Analytics (Weeks 11-14)
-- [ ] Advanced analytics dashboard
-- [ ] Spending trends & forecasting
-- [ ] Financial goals
-- [ ] Recurring transactions automation
+### Phase 3 — Analytics & Automation (CURRENT 🚀)
+- [x] Advanced analytics dashboard (Intelligence Dashboard)
+- [x] Spending trends & forecasting (Cashflow Forecast)
+- [x] Financial goals system
+- [x] Recurring transactions automation (Artisan Command)
+- [x] AI Subscription Detector (Visual Alert)
 - [ ] PWA (offline support, push notifications)
 
-### Phase 4 — Scale & Polish (Weeks 15-18)
+### Phase 4 — Scale & Export (Next)
 - [ ] Multi-currency support
-- [ ] Export (CSV, PDF statements)
+- [ ] Export Data (CSV, Excel, PDF Statements)
+- [ ] AI Pattern Detection (Suggesting recurring from manual)
 - [ ] Shared expenses / split bills
-- [ ] API for third-party integrations
 - [ ] Performance audit & optimization
 
 ---
