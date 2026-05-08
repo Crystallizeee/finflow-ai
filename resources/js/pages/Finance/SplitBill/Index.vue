@@ -6,7 +6,7 @@ import {
     ChevronRight, Loader2, Receipt, 
     UserPlus, CheckCircle2, User as UserIcon
 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 
 interface BillItem {
@@ -29,6 +29,9 @@ const friends = ref<Friend[]>([
 const newFriendName = ref('');
 const billItems = ref<BillItem[]>([]);
 const totalAmount = ref(0);
+const computedTotalAmount = computed(() => {
+    return billItems.value.reduce((acc, item) => acc + (Number(item.total_price) || 0), 0);
+});
 const selectedFile = ref<File | null>(null);
 
 const addFriend = () => {
@@ -187,7 +190,7 @@ const breadcrumbs = [
                     </div>
                     <div class="text-right">
                         <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Total Struk</p>
-                        <p class="text-3xl font-black text-indigo-600">{{ formatCurrency(totalAmount) }}</p>
+                        <p class="text-3xl font-black text-indigo-600">{{ formatCurrency(computedTotalAmount) }}</p>
                     </div>
                 </div>
 
@@ -200,10 +203,24 @@ const breadcrumbs = [
                                     <div class="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center">
                                         <Receipt class="w-6 h-6 text-slate-400" />
                                     </div>
-                                    <div>
-                                        <h4 class="font-black text-slate-900 dark:text-white">{{ item.name }}</h4>
-                                        <p class="text-indigo-600 font-bold">{{ formatCurrency(item.total_price) }}</p>
+                                    <div class="flex-1 min-w-0 pr-4">
+                                        <input 
+                                            v-model="item.name" 
+                                            type="text" 
+                                            class="w-full bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-slate-700 focus:border-indigo-500 focus:ring-0 p-0 pb-1 mb-1 font-black text-slate-900 dark:text-white transition-colors"
+                                            placeholder="Nama Barang..."
+                                        />
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-indigo-600 font-bold text-sm">Rp</span>
+                                            <input 
+                                                v-model.number="item.total_price" 
+                                                type="number" 
+                                                class="w-full bg-transparent border-b border-transparent hover:border-indigo-200 dark:hover:border-indigo-900 focus:border-indigo-500 focus:ring-0 p-0 text-indigo-600 font-bold transition-colors"
+                                                placeholder="0"
+                                            />
+                                        </div>
                                     </div>
+
                                 </div>
                             </div>
                             
