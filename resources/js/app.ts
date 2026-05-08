@@ -39,3 +39,13 @@ createInertiaApp({
 
 // This will set light / dark mode on page load...
 initializeTheme();
+
+// PWA Offline Support Notifications
+window.addEventListener('online', () => {
+    console.log('FinFlow is back online. Syncing data...');
+    // We could trigger a toast here if we had a global toast system
+});
+
+window.addEventListener('offline', () => {
+    console.log('FinFlow is offline. Transactions will be saved and synced when online.');
+});

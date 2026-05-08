@@ -62,7 +62,14 @@ class ReceiptService
                 
                 foreach ($data['items'] as $item) {
                     $qty = (float) ($item['quantity'] ?? 1);
-                    $ppu = (float) ($item['price_per_unit'] ?? $item['price'] ?? 0);
+                    
+                    // Sanitize price strings (handle Rp, dots, commas)
+                    $rawPrice = $item['price_per_unit'] ?? $item['price'] ?? 0;
+                    if (is_string($rawPrice)) {
+                        $rawPrice = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $rawPrice));
+                    }
+                    $ppu = (float) $rawPrice;
+
                     $disc = (float) ($item['discount'] ?? 0);
                     $total = (float) ($item['total_price'] ?? ($ppu * $qty) - $disc);
 
@@ -70,7 +77,12 @@ class ReceiptService
                     $catName = $item['category_suggestion'] ?? 'Lainnya';
                     $category = \App\Models\Category::firstOrCreate(
                         ['user_id' => $user->id, 'name' => $catName],
-                        ['color' => '#' . substr(md5($catName), 0, 6), 'type' => 'expense']
+                        [
+                            'slug'  => Str::slug($catName) . '-' . Str::random(4),
+                            'color' => '#' . substr(md5($catName), 0, 6), 
+                            'type'  => 'expense',
+                            'icon'  => 'fas fa-tags'
+                        ]
                     );
 
                     \App\Models\ReceiptItem::create([

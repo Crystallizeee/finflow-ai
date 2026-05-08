@@ -38,6 +38,19 @@ onMounted(() => {
         role: 'assistant',
         content: 'Halo! Saya FinFlow AI. Ada yang bisa saya bantu terkait analisis pengeluaran, sisa budget, atau saran keuangan hari ini?'
     });
+
+    // Check for query parameter 'q' to auto-start chat
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q');
+    if (query) {
+        form.content = query;
+        // Small delay to ensure everything is ready
+        setTimeout(() => {
+            sendMessage();
+            // Clear URL param without refreshing
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }, 500);
+    }
 });
 
 const renderMarkdown = (text: string) => {

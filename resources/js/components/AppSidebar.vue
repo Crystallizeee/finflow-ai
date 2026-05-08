@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Wallet, Receipt, Camera, BookOpen, Folder, Bot, PieChart, RefreshCcw, Award, BarChart3 } from 'lucide-vue-next';
+import { LayoutGrid, Wallet, Receipt, Camera, BookOpen, Folder, Bot, PieChart, RefreshCcw, Award, BarChart3, Split } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -50,6 +50,11 @@ const mainNavItems: NavItem[] = [
         icon: Camera,
     },
     {
+        title: 'Split Bill',
+        href: route('split-bill.index'),
+        icon: Split,
+    },
+    {
         title: 'Target Keuangan',
         href: route('goals.index'),
         icon: Award,
@@ -61,18 +66,7 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Github Repo',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
-    },
-];
+const footerNavItems: NavItem[] = [];
 </script>
 
 <template>

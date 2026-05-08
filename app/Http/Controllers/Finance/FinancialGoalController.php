@@ -47,12 +47,12 @@ class FinancialGoalController extends Controller
         $goal = $request->user()->goals()->create($validated);
 
         // Get AI Recommendation for monthly contribution
-        $this->updateAiRecommendation($goal);
+        $this->updateAiRecommendation($request->user(), $goal);
 
         return redirect()->back();
     }
 
-    private function updateAiRecommendation(FinancialGoal $goal)
+    private function updateAiRecommendation(\App\Models\User $user, FinancialGoal $goal)
     {
         $monthsLeft = Carbon::parse($goal->target_date)->diffInMonths(now());
         if ($monthsLeft <= 0) $monthsLeft = 1;
@@ -64,12 +64,18 @@ class FinancialGoalController extends Controller
         
         Berapa jumlah yang harus disisihkan per bulan? Berikan jawaban dalam angka saja (IDR).";
 
-        $recommendation = $this->aiService->chat($goal->user, [['role' => 'user', 'content' => $prompt]]);
-        
-        // Extract number from AI response
-        preg_match_all('!\d+!', str_replace(['.', ','], '', $recommendation), $matches);
-        $amount = isset($matches[0][0]) ? (float) $matches[0][0] : ($goal->target_amount / $monthsLeft);
+        try {
+            $recommendation = $this->aiService->chat($user, [['role' => 'user', 'content' => $prompt]]);
+            
+            // Extract number from AI response
+            preg_match_all('!\d+!', str_replace(['.', ','], '', $recommendation), $matches);
+            $amount = isset($matches[0][0]) ? (float) $matches[0][0] : ($goal->target_amount / $monthsLeft);
 
-        $goal->update(['monthly_contribution' => $amount]);
+            $goal->update(['monthly_contribution' => $amount]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("Goal AI Recommendation failed: " . $e->getMessage());
+            // Fallback to simple calculation
+            $goal->update(['monthly_contribution' => $goal->target_amount / $monthsLeft]);
+        }
     }
 }

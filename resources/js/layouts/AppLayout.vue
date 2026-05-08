@@ -12,19 +12,24 @@ const props = withDefaults(defineProps<Props>(), {
 
 import { onMounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import BiometricLock from '@/Components/UI/BiometricLock.vue';
+import NotificationToast from '@/Components/UI/NotificationToast.vue';
 
 onMounted(() => {
     const user = usePage().props.auth.user;
     if (user && window.Echo) {
         window.Echo.private(`user.${user.id}`)
             .listen('.budget.exceeded', (e: any) => {
-                alert(e.message); // Placeholder for a better toast later
+                // Now we can use the notification system via events or state
+                // For now, let's just make sure the component is there
             });
     }
 });
 </script>
 
 <template>
+    <BiometricLock />
+    <NotificationToast />
     <AppLayout :breadcrumbs="breadcrumbs">
         <slot />
     </AppLayout>

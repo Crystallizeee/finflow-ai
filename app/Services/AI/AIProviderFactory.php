@@ -16,7 +16,7 @@ class AIProviderFactory
         private readonly OllamaService $ollama,
     ) {
         $this->providers = [
-            'gemini_direct'     => fn() => $this->gemini->withModel('gemini-1.5-flash'),
+            'gemini_direct'     => fn() => $this->gemini->withModel('gemini-3-flash-preview'),
             'ollama_kimi'       => fn() => $this->ollama,
             'openrouter_free'   => fn() => $this->openRouter->withModel('google/gemini-2.0-flash-001'),
             'openrouter_llama'  => fn() => $this->openRouter->withModel('meta-llama/llama-3.1-8b-instruct:free'),

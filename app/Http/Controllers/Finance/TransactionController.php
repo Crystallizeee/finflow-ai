@@ -6,6 +6,7 @@ use App\DataTransferObjects\TransactionData;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Services\Finance\TransactionService;
+use App\Services\Finance\AchievementService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -29,36 +30,37 @@ class TransactionController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, AchievementService $achievementService)
     {
         $validated = $request->validate([
             'account_id' => 'required|exists:accounts,id',
             'category_id' => 'required|exists:categories,id',
-            'type' => 'required|in:income,expense,transfer',
-            'amount' => 'required|numeric|min:0.01',
-            'description' => 'nullable|string|max:500',
+            'type' => 'required|in:expense,income,transfer',
+            'amount' => 'required|numeric|min:0',
+            'currency' => 'required|string|size:3',
+            'exchange_rate' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
             'date' => 'required|date',
             'transfer_account_id' => 'required_if:type,transfer|nullable|exists:accounts,id',
-            'tags' => 'nullable|array',
-            'merchant' => 'nullable|string|max:255',
         ]);
-
-        // Security check: ensure account belongs to user
-        $account = auth()->user()->accounts()->findOrFail($validated['account_id']);
 
         $data = TransactionData::fromRequest($validated);
         
         $this->transactionService->create(auth()->user(), $data);
+        
+        // Check for new achievements
+        $achievementService->checkAchievements(auth()->user());
 
         return back()->with('success', 'Transaksi berhasil ditambahkan');
     }
 
     public function destroy(Transaction $transaction)
     {
-        $this->authorize('delete', $transaction);
+        // Simple security check
+        if ($transaction->user_id !== auth()->id()) {
+            abort(403);
+        }
 
-        // Reverse account balance logic would go here if needed
-        // For MVP, we'll just delete the transaction
         $transaction->delete();
 
         return back()->with('success', 'Transaksi berhasil dihapus');

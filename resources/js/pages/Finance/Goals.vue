@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, Link, router } from '@inertiajs/vue3';
 import { Award, Plus, Target, Calendar, TrendingUp, ChevronRight, CheckCircle2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 
@@ -17,6 +17,10 @@ const props = defineProps<{
         is_completed: boolean;
     }>
 }>();
+
+const goToChat = (goalName: string) => {
+    router.get(route('ai-chat.index'), { q: `Berikan strategi untuk mencapai target ${goalName}` });
+};
 
 const showAddModal = ref(false);
 
@@ -126,10 +130,13 @@ const breadcrumbs = [
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 dark:bg-slate-800/50 p-6 flex justify-between items-center group-hover:bg-indigo-600 transition-colors group">
-                        <p class="text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-white transition-colors">Lihat Strategi AI</p>
+                    <button 
+                        @click="goToChat(goal.name)"
+                        class="bg-slate-50 dark:bg-slate-800/50 p-6 flex justify-between items-center transition-colors group hover:bg-indigo-600 cursor-pointer block w-full border-t border-slate-100 dark:border-slate-800 text-left"
+                    >
+                        <span class="text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-white transition-colors">Lihat Strategi AI</span>
                         <ChevronRight class="w-5 h-5 text-slate-400 group-hover:text-white transition-all transform group-hover:translate-x-1" />
-                    </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -141,24 +148,86 @@ const breadcrumbs = [
                 <form @submit.prevent="submit" class="space-y-6">
                     <div>
                         <label class="block text-sm font-bold text-slate-500 mb-2 uppercase tracking-wider">Nama Target</label>
-                        <input v-model="form.name" type="text" placeholder="Misal: Beli MacBook Air" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-indigo-600 transition-all" />
+                        <input v-model="form.name" type="text" placeholder="Misal: Beli MacBook Air" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-indigo-600 transition-all" required />
+                        <p v-if="form.errors.name" class="text-rose-500 text-xs mt-1 font-bold">{{ form.errors.name }}</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-bold text-slate-500 mb-2 uppercase tracking-wider">Jumlah Target</label>
-                            <input v-model="form.target_amount" type="number" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-indigo-600 transition-all" />
+                            <input v-model="form.target_amount" type="number" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-indigo-600 transition-all" required />
+                            <p v-if="form.errors.target_amount" class="text-rose-500 text-xs mt-1 font-bold">{{ form.errors.target_amount }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-500 mb-2 uppercase tracking-wider">Target Tanggal</label>
-                            <input v-model="form.target_date" type="date" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-indigo-600 transition-all" />
+                            <input v-model="form.target_date" type="date" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-indigo-600 transition-all" required />
+                            <p v-if="form.errors.target_date" class="text-rose-500 text-xs mt-1 font-bold">{{ form.errors.target_date }}</p>
                         </div>
                     </div>
                     <div class="flex gap-4 pt-4">
                         <button type="button" @click="showAddModal = false" class="flex-1 px-6 py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 transition-all">Batal</button>
-                        <button type="submit" class="flex-1 bg-indigo-600 text-white px-6 py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 dark:shadow-none">Simpan Target</button>
+                        <button 
+                            type="submit" 
+                            class="flex-1 bg-indigo-600 text-white px-6 py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+                            :disabled="form.processing"
+                        >
+                            {{ form.processing ? 'Menyimpan...' : 'Simpan Target' }}
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </AppLayout>
 </template>
+
+<style scoped>
+/* Modern Styling for Native Datepicker */
+input[type="date"] {
+    position: relative;
+    appearance: none;
+    -webkit-appearance: none;
+    color-scheme: dark; /* Force dark mode calendar in supporting browsers */
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+
+/* Custom Calendar Icon Overlay */
+input[type="date"]::after {
+    content: '📅';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    filter: grayscale(1) brightness(0.7);
+}
+
+.dark input[type="date"]::after {
+    filter: invert(1) brightness(0.9);
+}
+
+/* Specific styling for the input box */
+input[type="date"] {
+    font-family: inherit;
+    font-weight: 600;
+}
+
+/* Reset for Chrome/Safari to make it look clean */
+input[type="date"]::-webkit-datetime-edit {
+    padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+}
+</style>

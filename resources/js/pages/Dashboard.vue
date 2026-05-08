@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
 import BalanceCard from '@/Components/Dashboard/BalanceCard.vue';
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import { Receipt, TrendingUp, Calendar, ArrowUpRight, ArrowDownRight, Wallet, Sparkles } from 'lucide-vue-next';
 
@@ -22,6 +22,7 @@ const props = defineProps<{
     aiInsight: string;
     activeGoals: any[];
     upcomingSubscriptions: any[];
+    forecast: any;
     auth: {
         user: {
             name: string;
@@ -40,46 +41,58 @@ const greeting = computed(() => {
 const chartOptions = computed(() => ({
     chart: {
         type: 'area',
-        fontFamily: 'inherit',
         toolbar: { show: false },
         zoom: { enabled: false },
-        sparkline: { enabled: false }
+        foreColor: '#64748b',
     },
     colors: ['#4f46e5'],
     fill: {
         type: 'gradient',
         gradient: {
             shadeIntensity: 1,
-            opacityFrom: 0.4,
+            opacityFrom: 0.45,
             opacityTo: 0.05,
-            stops: [0, 90, 100]
+            stops: [20, 100]
         }
     },
     dataLabels: { enabled: false },
-    stroke: { curve: 'smooth', width: 2 },
+    stroke: { curve: 'smooth', width: 3 },
     xaxis: {
         categories: props.monthlySpending?.labels || [],
-        labels: { 
-            show: true,
-            style: {
-                colors: '#94a3b8',
-                fontSize: '10px',
-                fontWeight: 900
-            }
-        },
         axisBorder: { show: false },
-        axisTicks: { show: false }
-    },
-    yaxis: { show: false },
-    grid: { show: false },
-    tooltip: {
-        theme: 'light',
-        y: {
-            formatter: function (val: number) {
-                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val)
+        axisTicks: { show: false },
+        labels: {
+            style: {
+                colors: '#000000',
+                fontWeight: 900,
+                fontSize: '12px'
             }
         }
-    }
+    },
+    yaxis: { 
+        show: true,
+        labels: {
+            style: {
+                colors: '#000000',
+                fontWeight: 900
+            }
+        }
+    },
+    grid: {
+        show: true,
+        borderColor: '#e2e8f0',
+        strokeDashArray: 4,
+    },
+    tooltip: {
+        theme: 'dark',
+        style: {
+            fontSize: '12px',
+            fontFamily: 'inherit'
+        },
+        y: {
+            formatter: (val: number) => formatCurrency(val)
+        }
+    },
 }));
 
 const spendingSeries = computed(() => {
@@ -89,9 +102,28 @@ const spendingSeries = computed(() => {
     }];
 });
 
-const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
+const formatCurrency = (value: number, currency: string = 'IDR') => {
+    return new Intl.NumberFormat('id-ID', { 
+        style: 'currency', 
+        currency: currency, 
+        maximumFractionDigits: 0 
+    }).format(value);
 };
+
+// Trigger notification for AI Insight on load
+onMounted(() => {
+    if (props.aiInsight) {
+        // Use a small delay for dramatic effect
+        setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('notify', { 
+                detail: { 
+                    type: 'info', 
+                    message: props.aiInsight 
+                } 
+            }));
+        }, 2000);
+    }
+});
 </script>
 
 <template>
@@ -110,11 +142,26 @@ const formatCurrency = (value: number) => {
                         Berikut ringkasan keuangan Anda hari ini.
                     </p>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Total Kekayaan</p>
-                    <p class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
-                        {{ formatCurrency(totalBalance) }}
-                    </p>
+                <div class="flex gap-4">
+                    <div v-if="forecast" class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col justify-center min-w-[180px]">
+                        <div class="flex justify-between items-center mb-1">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Prediksi Saldo Akhir</p>
+                            <div v-if="forecast.is_risky" class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+                        </div>
+                        <p class="text-xl font-black" :class="forecast.is_risky ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'">
+                            {{ formatCurrency(forecast.projected_end_balance || 0) }}
+                        </p>
+                        <p class="text-[9px] font-medium text-slate-400 mt-1">
+                            {{ forecast.is_risky ? '⚠️ Pengeluaran kamu agak boros nih!' : '✅ Keuangan kamu aman sampai akhir bulan.' }}
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 min-w-[180px]">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Kekayaan</p>
+                        <p class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
+                            {{ formatCurrency(totalBalance) }}
+                        </p>
+                    </div>
                 </div>
             </header>
 
@@ -184,7 +231,7 @@ const formatCurrency = (value: number) => {
                                 </div>
                                 <div class="text-right">
                                     <p class="text-sm font-black" :class="tx.type === 'expense' ? 'text-rose-600' : 'text-emerald-600'">
-                                        {{ tx.type === 'expense' ? '-' : '+' }}{{ formatCurrency(tx.amount) }}
+                                        {{ tx.type === 'expense' ? '-' : '+' }}{{ formatCurrency(tx.amount, tx.currency) }}
                                     </p>
                                 </div>
                             </div>

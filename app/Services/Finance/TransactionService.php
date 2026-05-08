@@ -24,6 +24,8 @@ class TransactionService
                 'transfer_account_id' => $data->transferAccountId,
                 'type'        => $data->type,
                 'amount'      => $data->amount,
+                'currency'    => $data->currency,
+                'exchange_rate' => $data->exchangeRate,
                 'base_amount' => $data->baseAmount,
                 'description' => $data->description,
                 'date'        => $data->date,
@@ -62,13 +64,20 @@ class TransactionService
     {
         $account = $transaction->account;
 
+        // Balance reduction should use base_amount if the transaction is in different currency 
+        // than the account, but for now we assume account is in IDR and transaction base_amount is IDR.
+        // If account currency matches transaction currency, we use amount.
+        $adjustment = ($account->currency === $transaction->currency) 
+            ? $transaction->amount 
+            : $transaction->base_amount;
+
         if ($transaction->type === 'income') {
-            $account->increment('balance', $transaction->amount);
+            $account->increment('balance', $adjustment);
         } elseif ($transaction->type === 'expense') {
-            $account->decrement('balance', $transaction->amount);
+            $account->decrement('balance', $adjustment);
         } elseif ($transaction->type === 'transfer' && $transaction->transfer_account_id) {
-            $account->decrement('balance', $transaction->amount);
-            $transaction->transferAccount()->increment('balance', $transaction->amount);
+            $account->decrement('balance', $adjustment);
+            $transaction->transferAccount()->increment('balance', $adjustment);
         }
     }
 

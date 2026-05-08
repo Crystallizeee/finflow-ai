@@ -50,35 +50,32 @@ class GeminiService implements AIProviderInterface
 
     public function parseReceipt(string $imageBase64, string $mimeType): array
     {
-        $prompt = "Analyze this receipt or transfer proof image. Extract information into a strict JSON format with these keys: 
-        - merchant_name: string (e.g. 'PT LION SUPER INDO' or sender's name if transfer received)
-        - date: string (YYYY-MM-DD)
-        - subtotal_amount: number (raw numeric value before tax/admin)
-        - tax_amount: number
-        - admin_fee: number (including any service charge or admin fee)
-        - total_discount: number
-        - total_amount: number (raw numeric value, the final paid amount)
-        - currency: string (3-letter code, e.g. 'IDR')
-        - type: string (must be exactly 'expense' if it's a purchase/shopping, or 'income' if it's a transfer received/deposit)
-        - items: array of objects {name, category_suggestion, price_per_unit, quantity, discount, total_price}
+        $prompt = "Analyze this receipt or transfer proof image carefully. 
+        - Extract every single line item into the 'items' array.
+        - For each item, capture EXACT name as written, price, and quantity.
+        - Calculate raw numeric values for all amounts. DO NOT include currency symbols or separators in numeric fields.
+        - Field 'category_suggestion' MUST be one of these standardized categories:
+        'Makanan & Minuman', 'Kesehatan & Kecantikan', 'Kebersihan & Rumah Tangga', 'Bayi & Anak-anak', 'Hewan Peliharaan', 'Elektronik & Elektrik', 'Olahraga & Outdoor', 'Pakaian & Mode', 'Alat Tulis Kantor', 'Teknologi & Gadget', 'Otomotif', 'Lainnya'.
         
-        Field 'category_suggestion' MUST be one of these standardized categories if applicable:
-        - 'Makanan & Minuman' (Food, drinks, fresh produce, snacks, frozen food)
-        - 'Kesehatan & Kecantikan' (Medicine, skincare, hair care, toiletries)
-        - 'Kebersihan & Rumah Tangga' (Detergents, cleaning tools, household needs)
-        - 'Bayi & Anak-anak' (Formula, diapers, baby care, toys)
-        - 'Hewan Peliharaan' (Pet food, pet care)
-        - 'Elektronik & Elektrik' (Batteries, light bulbs, small appliances)
-        - 'Olahraga & Outdoor' (Sporting goods, camping gear)
-        - 'Pakaian & Mode' (Clothing, accessories, fashion)
-        - 'Alat Tulis Kantor' (Pens, notebooks, office supplies)
-        - 'Teknologi & Gadget' (Smartphone accessories, small gadgets)
-        - 'Otomotif' (Engine oil, car care)
-        
-        Return ONLY the JSON object. Do not include markdown blocks.";
+        Strict JSON format:
+        {
+          \"merchant_name\": \"string\",
+          \"date\": \"YYYY-MM-DD\",
+          \"subtotal_amount\": number,
+          \"tax_amount\": number,
+          \"admin_fee\": number,
+          \"total_discount\": number,
+          \"total_amount\": number,
+          \"currency\": \"IDR\",
+          \"type\": \"expense\"|\"income\",
+          \"items\": [
+            {\"name\": \"string\", \"category_suggestion\": \"string\", \"price_per_unit\": number, \"quantity\": number, \"discount\": number, \"total_price\": number}
+          ]
+        }
+        Return ONLY the JSON object. Do not include markdown blocks or any other text.";
 
         try {
-            $response = Http::timeout(120)->post(self::BASE_URL . "/models/{$this->model}:generateContent?key={$this->apiKey}", [
+            $response = Http::timeout(180)->post(self::BASE_URL . "/models/{$this->model}:generateContent?key={$this->apiKey}", [
                 'contents' => [
                     [
                         'parts' => [
@@ -92,27 +89,46 @@ class GeminiService implements AIProviderInterface
                         ],
                     ],
                 ],
+                'generationConfig' => [
+                    'temperature' => 0.1,
+                    'maxOutputTokens' => 4096, // Increase to handle long receipts
+                ],
             ]);
 
             $fullJson = $response->json();
-            \Illuminate\Support\Facades\Log::info("Full Gemini Response: " . json_encode($fullJson));
             
             if ($response->failed() || isset($fullJson['error'])) {
                 $errMsg = $fullJson['error']['message'] ?? $response->body();
+                Log::error("Gemini API Error Body: " . $response->body());
                 throw new \RuntimeException("Gemini API Error: " . $errMsg);
             }
             
             $raw = data_get($fullJson, 'candidates.0.content.parts.0.text', '');
+            Log::info("Raw Gemini Output (Length: " . strlen($raw) . "): " . $raw);
 
-            // Clean JSON
-            $clean = preg_replace('/^```json\s*|\s*```$/m', '', $raw);
+            // Robust JSON extraction
+            $clean = trim($raw);
+            $clean = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', $clean);
+            
             $firstBrace = strpos($clean, '{');
             $lastBrace = strrpos($clean, '}');
+            
             if ($firstBrace !== false && $lastBrace !== false) {
                 $clean = substr($clean, $firstBrace, $lastBrace - $firstBrace + 1);
             }
 
-            return json_decode($clean, true) ?? [];
+            $decoded = json_decode($clean, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error("JSON Decode Error: " . json_last_error_msg() . " | Input Snippet: " . substr($clean, 0, 100) . "...");
+                // Try simple fix: if it's truncated, AI might have stopped mid-JSON
+                if (json_last_error() === JSON_ERROR_CTRL_CHAR || json_last_error() === JSON_ERROR_SYNTAX) {
+                     Log::warning("Attempting to fix malformed JSON from AI...");
+                }
+                return [];
+            }
+
+            return $decoded ?? [];
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Gemini Parse Error: " . $e->getMessage());
             throw $e;

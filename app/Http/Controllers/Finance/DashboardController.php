@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $user = $request->user();
 
         return Inertia::render('Dashboard', [
-            'totalBalance' => $user->accounts()->sum('balance'),
+            'totalBalance' => (float) $user->accounts()->sum('balance'),
             'recentTransactions' => $user->transactions()
                 ->with(['category', 'account'])
                 ->latest('date')
@@ -49,6 +49,7 @@ class DashboardController extends Controller
                     'amount' => (float) $s->amount,
                     'next_date' => $s->next_billing_date->format('d M')
                 ]),
+            'forecast' => $this->analyticsService->getForecast($user),
         ]);
     }
 }

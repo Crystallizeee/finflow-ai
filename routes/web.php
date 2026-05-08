@@ -41,6 +41,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // AI Chat Assistant
     Route::get('ai-chat', [App\Http\Controllers\Finance\AIChatController::class, 'index'])->name('ai-chat.index');
     Route::post('ai-chat/send', [App\Http\Controllers\Finance\AIChatController::class, 'send'])->name('ai-chat.send');
+
+    // Investments
+    Route::resource('investments', \App\Http\Controllers\Finance\InvestmentController::class);
+
+    // Split Bill
+    Route::get('split-bill', [\App\Http\Controllers\Finance\SplitBillController::class, 'index'])->name('split-bill.index');
+    Route::post('split-bill/scan', [\App\Http\Controllers\Finance\SplitBillController::class, 'scan'])->name('split-bill.scan');
+    Route::post('split-bill/store', [\App\Http\Controllers\Finance\SplitBillController::class, 'store'])->name('split-bill.store');
 });
 
 require __DIR__.'/settings.php';
